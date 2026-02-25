@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: gym_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-gym_db}
+      POSTGRES_USER: ${DB_USER:-gym_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-gym_password}
+    ports:
+      - '${DB_PORT:-5432}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-gym_user} -d ${DB_NAME:-gym_db}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gym_api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-gym_db}
+      DB_USER: ${DB_USER:-gym_user}
+      DB_PASSWORD: ${DB_PASSWORD:-gym_password}
+      JWT_SECRET: ${JWT_SECRET:-change_this_secret}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change_this_refresh_secret}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      PORT: ${PORT:-3000}
+      STORAGE_PATH: ${STORAGE_PATH:-./storage}
+    ports:
+      - '${PORT:-3000}:3000'
+    volumes:
+      - ./storage:/app/storage
+
+volumes:
+  postgres_data:

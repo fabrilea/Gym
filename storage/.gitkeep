@@ -1,0 +1,2 @@
+# This directory holds uploaded Excel imports and generated Excel exports.
+# Sub-directories (imports/, exports/) are created automatically at runtime.

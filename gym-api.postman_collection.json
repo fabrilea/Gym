@@ -1,0 +1,313 @@
+{
+  "info": {
+    "name": "Gym Member Management API",
+    "_postman_id": "gym-api-collection-v1",
+    "description": "Complete collection for the Gym Member Management API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api/v1" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('accessToken', body.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', body.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dni\": \"TU_DNI_ADMIN\",\n  \"password\": \"TU_PASSWORD_ADMIN\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/refresh",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/logout",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users?page=1&limit=20",
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "name", "value": "", "disabled": true },
+                { "key": "memberNumber", "value": "", "disabled": true },
+                { "key": "dni", "value": "", "disabled": true }
+              ]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/users/USER_UUID_HERE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/users",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberNumber\": \"000001\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Pérez\",\n  \"dni\": \"12345678\",\n  \"email\": \"juan.perez@example.com\",\n  \"phone\": \"+54 9 11 1234-5678\",\n  \"plan\": \"Mensual\",\n  \"planExpiresAt\": \"2026-03-31\",\n  \"status\": \"ACTIVE\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/users/USER_UUID_HERE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"INACTIVE\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/users/USER_UUID_HERE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Checkins",
+      "item": [
+        {
+          "name": "Create Checkin",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/checkins",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberNumber\": \"000001\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Checkins by Date",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/checkins?date=2026-02-25",
+              "query": [{ "key": "date", "value": "2026-02-25" }]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "List Checkins by User",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/checkins/user/USER_UUID_HERE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Imports",
+      "item": [
+        {
+          "name": "Validate Import (Upload Excel)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/imports/validate",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": "/path/to/members.xlsx" },
+                { "key": "monthKey", "value": "2026-02", "type": "text" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Apply Import",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/imports/apply/IMPORT_JOB_UUID_HERE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "List Import Jobs",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/imports",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Billing",
+      "item": [
+        {
+          "name": "Monthly Status",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/billing/monthly-status?monthKey=2026-02&page=1&limit=20",
+              "query": [
+                { "key": "monthKey", "value": "2026-02" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "memberNumber", "value": "", "disabled": true },
+                { "key": "name", "value": "", "disabled": true }
+              ]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Upsert Payment",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/billing/payments",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"USER_UUID_HERE\",\n  \"monthKey\": \"2026-02\",\n  \"amountDue\": 12000,\n  \"amountPaid\": 12000,\n  \"paidAt\": \"2026-02-10T15:00:00Z\",\n  \"method\": \"CASH\",\n  \"reference\": \"REC-0001\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Plan Period",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/billing/plan-periods",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"USER_UUID_HERE\",\n  \"planName\": \"Mensual\",\n  \"startDate\": \"2026-02-01\",\n  \"endDate\": \"2026-02-28\",\n  \"status\": \"ACTIVE\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Export Monthly Status",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/billing/monthly-status/export",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"monthKey\": \"2026-02\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Exports",
+      "item": [
+        {
+          "name": "Generate Export",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/exports/generate",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"monthKey\": \"2026-02\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Exports",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/exports?monthKey=2026-02",
+              "query": [{ "key": "monthKey", "value": "2026-02" }]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Get Export (with download URL)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/exports/EXPORT_JOB_UUID_HERE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        }
+      ]
+    }
+  ]
+}
